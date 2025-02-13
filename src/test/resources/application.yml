@@ -1,0 +1,22 @@
+scheduling:
+  enabled: false
+
+spring:
+  jackson:
+    default-property-inclusion: non_null
+  datasource:
+    driverClassName: org.h2.Driver
+    url: jdbc:h2:mem:it_request_service;INIT=create domain if not exists jsonb as text;MODE=PostgreSQL
+    username: sa
+    password: password
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+
+org:
+  jobrunr:
+    database:
+      skip-create: true
+    background-job-server:
+      enabled: false
+    dashboard:
+      enabled: false

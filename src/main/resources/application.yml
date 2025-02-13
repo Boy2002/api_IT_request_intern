@@ -1,7 +1,7 @@
 server:
   http2:
     enabled: true
-  port: 8082
+  port: 8083
   tomcat:
     relaxed-query-chars: '|,{,},[,]'
     max-swallow-size: 30MB
@@ -20,11 +20,11 @@ spring:
         hibernate:
           format_sql: true
           use_sql_comments: true
-  #  application:
-  #    name: it_request
+    application:
+      name: it-request-service
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://${DATABASE_HOST:localhost}:${DATABASE_PORT:5432}/itRequest
+    url: jdbc:postgresql://${DATABASE_HOST:localhost}:${DATABASE_PORT:5432}/it_request_service
     username: ${DATABASE_USER:root}
     password: ${DATABASE_PASSWORD:root}
   liquibase:
