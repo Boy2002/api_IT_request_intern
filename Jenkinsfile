@@ -63,7 +63,7 @@ pipeline {
           script {
             withEnv(["JAVA_HOME=${JAVA_HOME}"]) {
               def commands = [
-                "rm -rf src/test/java/com/rider/it_request/ci",
+                "rm -rf src/test/java/com/rider/it_request_service/ci",
                 // "rm src/test/resources/application-gen-db-for-diff.yml",
                 // "make generate-version",
                 "chmod +x ./gradlew",
