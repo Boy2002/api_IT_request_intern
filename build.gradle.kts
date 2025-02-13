@@ -61,7 +61,7 @@ dependencies {
 	runtimeOnly ("io.jsonwebtoken:jjwt-impl:0.11.5")
 	runtimeOnly ("io.jsonwebtoken:jjwt-jackson:0.11.5")
 
-	//Dotenv ช่วยให้คุณสามารถเก็บค่าการตั้งค่าต่าง ๆ เช่น รหัสผ่าน, คีย์ API, หรือ URL ของฐานข้อมูล ไว้ในไฟล์ .env แยกจากโค้ดของคุณ
+	//Dotenv ช่วยให้สามารถเก็บค่าการตั้งค่าต่าง ๆ เช่น รหัสผ่าน, คีย์ API, หรือ URL ของฐานข้อมูล ไว้ในไฟล์ .env แยกจากโค้ดของคุณ
 	implementation("io.github.cdimascio:dotenv-java:3.0.0")
 
 	//swagger

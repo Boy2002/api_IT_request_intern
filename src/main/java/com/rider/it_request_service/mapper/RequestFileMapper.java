@@ -1,6 +1,8 @@
 package com.rider.it_request_service.mapper;
 
+import com.rider.it_request_service.dto.RequestDTO;
 import com.rider.it_request_service.dto.RequestFileDTO;
+import com.rider.it_request_service.entity.Request;
 import com.rider.it_request_service.entity.RequestFile;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;

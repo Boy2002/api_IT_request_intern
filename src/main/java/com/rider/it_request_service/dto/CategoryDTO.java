@@ -1,18 +1,27 @@
 package com.rider.it_request_service.dto;
 
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+
 public class CategoryDTO {
 
     private int categoryId;
 
-    @NotNull(message = "Category name cannot be null") private String categoryName;
+    @NotNull(message = "Category name cannot be null")
+    private String categoryName;
+
+    private boolean isDeleted;
+
+
 }

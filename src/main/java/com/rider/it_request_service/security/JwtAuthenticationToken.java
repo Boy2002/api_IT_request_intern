@@ -1,16 +1,18 @@
 package com.rider.it_request_service.security;
 
 import com.rider.it_request_service.dto.UserDTO;
-import java.util.List;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import java.util.List;
 
 public class JwtAuthenticationToken extends AbstractAuthenticationToken {
-    private final UserDTO principal;
+    private final UserDetails principal;
 
-    public JwtAuthenticationToken(UserDTO userDTO, List<SimpleGrantedAuthority> authorities) {
+    public JwtAuthenticationToken(UserDetails userDetails, List<SimpleGrantedAuthority> authorities) {
         super(authorities);
-        this.principal = userDTO;
+        this.principal = userDetails;
     }
 
     @Override

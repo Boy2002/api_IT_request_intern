@@ -1,17 +1,22 @@
 package com.rider.it_request_service.dto;
 
 import com.rider.it_request_service.entity.Request;
-import java.time.LocalDateTime;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class RequestStatusHistoryDTO {
+
 
     private Integer historyId;
 
@@ -26,4 +31,7 @@ public class RequestStatusHistoryDTO {
     private LocalDateTime changedAt;
 
     private Integer refStatusHistory;
+
+
+
 }

@@ -2,9 +2,10 @@ package com.rider.it_request_service.service;
 
 import com.rider.it_request_service.entity.RequestFile;
 import com.rider.it_request_service.repository.RequestFileRepository;
-import java.time.LocalDateTime;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.time.LocalDateTime;
 
 @Service
 public class RequestFileService {
@@ -15,15 +16,14 @@ public class RequestFileService {
         this.requestFileRepository = requestFileRepository;
     }
 
-    public RequestFile saveFile(MultipartFile file, String filePath, int requestId) {
+    public RequestFile saveFile(MultipartFile file, String filePath,int requestId) {
 
-        RequestFile requestFile =
-                RequestFile.builder()
-                        .fileName(file.getOriginalFilename())
-                        .filePath(filePath)
-                        .uploadedAt(LocalDateTime.now())
-                        .requestId(requestId)
-                        .build();
+        RequestFile requestFile = RequestFile.builder()
+                .fileName(file.getOriginalFilename())
+                .filePath(filePath)
+                .uploadedAt(LocalDateTime.now())
+                .requestId(requestId)
+                .build();
 
         return requestFileRepository.save(requestFile);
     }

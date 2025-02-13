@@ -224,5 +224,17 @@ databaseChangeLog:
             referencedTableName: request_status_history
             referencedColumnNames: history_id
             constraintName: fk_request_status_history_self
-
+  - changeSet:
+      id: 6
+      author: userone
+      changes:
+        - addColumn:
+            tableName: categories
+            columns:
+              - column:
+                  name: is_deleted
+                  type: boolean
+                  defaultValueBoolean: false
+                  constraints:
+                    nullable: false
 

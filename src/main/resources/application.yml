@@ -24,7 +24,7 @@ spring:
       name: it-request-service
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://${DATABASE_HOST:localhost}:${DATABASE_PORT:5432}/it_request_service
+    url: jdbc:postgresql://${DATABASE_HOST:localhost}:${DATABASE_PORT:5432}/itRequest
     username: ${DATABASE_USER:root}
     password: ${DATABASE_PASSWORD:root}
   liquibase:

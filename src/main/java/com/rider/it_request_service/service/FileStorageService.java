@@ -1,20 +1,19 @@
 package com.rider.it_request_service.service;
 
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.UUID;
-import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class FileStorageService {
 
-    private final String UPLOAD_DIR =
-            System.getProperty("user.dir") + File.separator + "uploads" + File.separator;
-
+    private final String UPLOAD_DIR = System.getProperty("user.dir") + File.separator + "uploads" + File.separator;
     // เก็บในโฟลเดอร์ "uploads" ภายในโปรเจค
     // กำหนดโฟลเดอร์เก็บไฟล์
 
