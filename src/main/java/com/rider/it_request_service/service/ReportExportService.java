@@ -1,10 +1,6 @@
 package com.rider.it_request_service.service;
 
 import com.rider.it_request_service.dto.RequestAdminBoardDTO;
-import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.springframework.stereotype.Service;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -13,6 +9,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.stereotype.Service;
 
 @Service
 public class ReportExportService {
@@ -23,13 +22,23 @@ public class ReportExportService {
 
         // สร้าง header row
         Row headerRow = sheet.createRow(0);
-        String[] columns = {"วันที่ร้องขอ", "หมายเลขรายการเอกสาร", "ชื่อผู้ร้องขอ", "ตำแหน่ง", "ประเภทคำร้อง", "รายละเอียด", "เหตุผล", "มาตรฐานหรือสเปคที่ต้องการ", "สถานะ"};
+        String[] columns = {
+            "วันที่ร้องขอ",
+            "หมายเลขรายการเอกสาร",
+            "ชื่อผู้ร้องขอ",
+            "ตำแหน่ง",
+            "ประเภทคำร้อง",
+            "รายละเอียด",
+            "เหตุผล",
+            "มาตรฐานหรือสเปคที่ต้องการ",
+            "สถานะ"
+        };
 
         // สร้าง CellStyle สำหรับหัวตาราง
         CellStyle headerStyle = workbook.createCellStyle();
         Font headerFont = workbook.createFont();
-        headerFont.setBold(true);  // ทำให้ฟอนต์หนา
-        headerFont.setFontHeightInPoints((short) 12);  // ขนาดฟอนต์
+        headerFont.setBold(true); // ทำให้ฟอนต์หนา
+        headerFont.setFontHeightInPoints((short) 12); // ขนาดฟอนต์
         headerStyle.setFont(headerFont);
         headerStyle.setFillForegroundColor(IndexedColors.LIGHT_YELLOW.getIndex()); // ตั้งสีพื้นหลัง
         headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND); // ให้สีพื้นหลังสม่ำเสมอ
@@ -37,11 +46,12 @@ public class ReportExportService {
         for (int i = 0; i < columns.length; i++) {
             Cell cell = headerRow.createCell(i);
             cell.setCellValue(columns[i]);
-            cell.setCellStyle(headerStyle);  // ใช้ CellStyle ที่ตั้งไว้
+            cell.setCellStyle(headerStyle); // ใช้ CellStyle ที่ตั้งไว้
         }
 
         // กำหนดรูปแบบวันที่ไทย
-        SimpleDateFormat thaiDateFormat = new SimpleDateFormat("d MMMM yyyy HH:mm", new Locale("th", "TH"));
+        SimpleDateFormat thaiDateFormat =
+                new SimpleDateFormat("d MMMM yyyy HH:mm", new Locale("th", "TH"));
 
         // เพิ่มข้อมูลจาก requestList ลงใน Excel
         int rowNum = 1;
@@ -56,7 +66,8 @@ public class ReportExportService {
                     LocalDateTime createdAtDateTime = request.getCreatedAt();
                     if (createdAtDateTime != null) {
                         // แปลง LocalDateTime เป็น String โดยใช้ DateTimeFormatter
-                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                        DateTimeFormatter formatter =
+                                DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
                         String dateString = createdAtDateTime.format(formatter);
 
                         // แปลงเป็น Date object สำหรับใช้ใน SimpleDateFormat

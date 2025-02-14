@@ -17,9 +17,12 @@ public class WebConfig {
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**") // อนุญาตทุก endpoint
                         .allowedOrigins("*")
-//                        .allowedOrigins("http://127.0.0.1:5500", // ระบุ Origin ที่อนุญาต
-//                                "https://4af6-124-120-251-50.ngrok-free.app",
-//                                "http://localhost:4200") // ระบุ Origin ที่อนุญาต
+                        //                        .allowedOrigins("http://127.0.0.1:5500", // ระบุ
+                        // Origin ที่อนุญาต
+                        //
+                        // "https://4af6-124-120-251-50.ngrok-free.app",
+                        //                                "http://localhost:4200") // ระบุ Origin
+                        // ที่อนุญาต
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*");
             }
@@ -28,8 +31,6 @@ public class WebConfig {
 
     @Bean
     public OpenAPI customOpenAPI() {
-        return new OpenAPI()
-                .info(new Info().title("My API").version("v1"));
+        return new OpenAPI().info(new Info().title("My API").version("v1"));
     }
 }
-

@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "categories")//ตารางประเภทคำขอ
+@Table(name = "categories") // ตารางประเภทคำขอ
 public class Category {
 
     @Id
@@ -21,12 +21,10 @@ public class Category {
     @Column(name = "category_id")
     private int categoryId;
 
-    @NotNull(message = "Category name cannot be null")
-    @Size(min = 1, max = 100, message = "Category name must be between 1 and 100 characters")
+    @NotNull(message = "Category name cannot be null") @Size(min = 1, max = 100, message = "Category name must be between 1 and 100 characters")
     @Column(name = "category_name", nullable = false, length = 100)
     private String categoryName;
 
     @Column(name = "is_deleted", nullable = false)
-    private boolean isDeleted = false;  // ค่าเริ่มต้นคือ false (ยังไม่ถูกลบ)
-
+    private boolean isDeleted = false; // ค่าเริ่มต้นคือ false (ยังไม่ถูกลบ)
 }
