@@ -118,9 +118,8 @@ public class RequestController {
     public ResponseEntity<Object> RecordRequestForm(
             @AuthenticationPrincipal CustomUserDetails user,
             @RequestPart(value = "request", required = true) String jsonObj,
-            @RequestPart(value = "files", required = false) MultipartFile[] files,
+            @RequestPart(value = "files", required = false) MultipartFile[] files, // required = false
             BindingResult bindingResult) {
-
         try {
             // แปลง JSON String เป็น RequestDTO
             ObjectMapper objectMapper = new ObjectMapper();
@@ -137,12 +136,14 @@ public class RequestController {
             // 1. บันทึกข้อมูล Request
             RequestDTO savedRequestDTO = requestService.addRequest(user, requestDTO);
 
-            // 2. วนลูปเพื่อบันทึกไฟล์ทั้งหมด
-            for (MultipartFile file : files) {
-                if (file.isEmpty()) continue;
-                String filePath = fileStorageService.storeFile(file);
-                RequestFile savedFile =
-                        requestFileService.saveFile(file, filePath, savedRequestDTO.getRequestId());
+            // 2. ตรวจสอบว่ามีไฟล์หรือไม่ ก่อนทำการบันทึก
+            if (files != null) {
+                for (MultipartFile file : files) {
+                    if (file.isEmpty()) continue;
+                    String filePath = fileStorageService.storeFile(file);
+                    RequestFile savedFile =
+                            requestFileService.saveFile(file, filePath, savedRequestDTO.getRequestId());
+                }
             }
 
             RequestAdminBoardDTO requestAdminBoardDTO =
@@ -154,6 +155,7 @@ public class RequestController {
                     "เกิดข้อผิดพลาดในการแปลง JSON: " + e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
+
 }
 
 // เเบ่งระหว่าง employee กับ admin
