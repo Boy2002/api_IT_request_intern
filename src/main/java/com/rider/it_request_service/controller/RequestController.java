@@ -118,7 +118,7 @@ public class RequestController {
     public ResponseEntity<Object> RecordRequestForm(
             @AuthenticationPrincipal CustomUserDetails user,
             @RequestPart(value = "request", required = true) String jsonObj,
-            @RequestPart("files") MultipartFile[] files,
+            @RequestPart(value = "files", required = false) MultipartFile[] files,
             BindingResult bindingResult) {
 
         try {
