@@ -64,6 +64,7 @@ public class CategoryService {
 
     public List<CategoryDTO> getAllCategories() {
         return categoryRepository.findAll().stream()
+                .sorted((c1, c2) -> Boolean.compare(c1.isDeleted(), c2.isDeleted())) // จัดเรียงให้ False มาก่อน True
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
     }
