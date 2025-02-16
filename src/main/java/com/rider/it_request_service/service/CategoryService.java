@@ -56,8 +56,14 @@ public class CategoryService {
         categoryRepository.save(category); // บันทึกข้อมูลใหม่
     }
 
-    public List<CategoryDTO> getAllCategories() {
+    public List<CategoryDTO> getAllFalseCategories() {
         return categoryRepository.findByIsDeletedFalse().stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
+    }
+
+    public List<CategoryDTO> getAllCategories() {
+        return categoryRepository.findAll().stream()
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
     }

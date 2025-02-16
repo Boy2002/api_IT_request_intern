@@ -55,6 +55,13 @@ public class CategoryController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
+    public ResponseEntity<List<CategoryDTO>> getAllFalseCategories() {
+        List<CategoryDTO> categories = categoryService.getAllFalseCategories();
+        return ResponseEntity.ok(categories);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/all")
     public ResponseEntity<List<CategoryDTO>> getAllCategories() {
         List<CategoryDTO> categories = categoryService.getAllCategories();
         return ResponseEntity.ok(categories);
