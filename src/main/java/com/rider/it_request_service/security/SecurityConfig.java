@@ -41,9 +41,10 @@ public class SecurityConfig {
                                 auth.requestMatchers("/api/auth/login", "/api/auth/hash-passwords")
                                         .permitAll()
                                         .requestMatchers("/api/req-admin/**", "/api/categories/**")
-                                        .permitAll()//.hasRole("ADMIN")
+                                        .permitAll() // .hasRole("ADMIN")
                                         .requestMatchers("/api/requests/**")
-                                        .permitAll()//.hasAnyRole("EMPLOYEE", "ADMIN")//.permitAll()
+                                        .permitAll() // .hasAnyRole("EMPLOYEE",
+                                        // "ADMIN")//.permitAll()
                                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**")
                                         .permitAll()
                                         .requestMatchers("/api/files/**")

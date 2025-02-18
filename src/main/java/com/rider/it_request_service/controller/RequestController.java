@@ -118,7 +118,8 @@ public class RequestController {
     public ResponseEntity<Object> RecordRequestForm(
             @AuthenticationPrincipal CustomUserDetails user,
             @RequestPart(value = "request", required = true) String jsonObj,
-            @RequestPart(value = "files", required = false) MultipartFile[] files, // required = false
+            @RequestPart(value = "files", required = false)
+                    MultipartFile[] files, // required = false
             BindingResult bindingResult) {
         try {
             // แปลง JSON String เป็น RequestDTO
@@ -142,7 +143,8 @@ public class RequestController {
                     if (file.isEmpty()) continue;
                     String filePath = fileStorageService.storeFile(file);
                     RequestFile savedFile =
-                            requestFileService.saveFile(file, filePath, savedRequestDTO.getRequestId());
+                            requestFileService.saveFile(
+                                    file, filePath, savedRequestDTO.getRequestId());
                 }
             }
 
@@ -155,7 +157,6 @@ public class RequestController {
                     "เกิดข้อผิดพลาดในการแปลง JSON: " + e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
-
 }
 
 // เเบ่งระหว่าง employee กับ admin
@@ -330,7 +331,7 @@ class AdminController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/search")
-    public ResponseEntity<Page<RequestAdminBoardDTO>> searchRequests(
+    public ResponseEntity<CustomPageWithStatisticsDTO<RequestAdminBoardDTO>> searchRequests(
             @RequestParam(value = "requestId", required = false) Integer requestId,
             @RequestParam(value = "requestNumber", required = false) String requestNumber,
             @RequestParam(value = "name", required = false) String name,
@@ -353,11 +354,16 @@ class AdminController {
                         page,
                         size);
 
-        // เรียกใช้งาน service เพื่อค้นหาแบบมี pagination
-        Page<RequestAdminBoardDTO> results = requestService.searchRequests(searchRequestDTO);
+        CustomPageWithStatisticsDTO<RequestAdminBoardDTO> results =
+                requestService.searchRequests(searchRequestDTO);
 
         return ResponseEntity.ok(results);
     }
+
+    /* @GetMapping("/search")
+    public ResponseEntity<?> searchRequests(@ModelAttribute SearchRequestDTO searchDto) {
+        return ResponseEntity.ok(requestService.searchRequestsWithStatistics(searchDto));
+    }*/
 
     // สำหรับดึงคำร้องเเต่ละสถานะ
     @PreAuthorize("hasRole('ADMIN')")

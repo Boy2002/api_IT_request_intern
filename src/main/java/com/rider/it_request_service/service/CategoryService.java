@@ -64,7 +64,11 @@ public class CategoryService {
 
     public List<CategoryDTO> getAllCategories() {
         return categoryRepository.findAll().stream()
-                .sorted((c1, c2) -> Boolean.compare(c1.isDeleted(), c2.isDeleted())) // จัดเรียงให้ False มาก่อน True
+                .sorted(
+                        (c1, c2) ->
+                                Boolean.compare(
+                                        c1.isDeleted(),
+                                        c2.isDeleted())) // จัดเรียงให้ False มาก่อน True
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
     }
@@ -79,6 +83,26 @@ public class CategoryService {
                                 new ResponseStatusException(
                                         HttpStatus.NOT_FOUND,
                                         "Category with ID " + categoryId + " not found"));
+    }
+
+    public CategoryDTO restoreCategory(int categoryId) {
+        Category category =
+                categoryRepository
+                        .findById(categoryId)
+                        .orElseThrow(
+                                () ->
+                                        new ResponseStatusException(
+                                                HttpStatus.NOT_FOUND,
+                                                "Category with ID " + categoryId + " not found"));
+
+        if (!category.isDeleted()) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "Category with ID " + categoryId + " is not deleted.");
+        }
+
+        category.setDeleted(false); // เปลี่ยนกลับเป็น false
+        Category restoredCategory = categoryRepository.save(category);
+        return mapToDTO(restoredCategory);
     }
 
     private CategoryDTO mapToDTO(Category category) {

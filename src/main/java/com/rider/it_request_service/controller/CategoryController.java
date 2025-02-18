@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/api/categories")
@@ -65,6 +66,17 @@ public class CategoryController {
     public ResponseEntity<List<CategoryDTO>> getAllCategories() {
         List<CategoryDTO> categories = categoryService.getAllCategories();
         return ResponseEntity.ok(categories);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("/restore/{categoryId}")
+    public ResponseEntity<?> restoreCategory(@PathVariable int categoryId) {
+        try {
+            CategoryDTO restoredCategory = categoryService.restoreCategory(categoryId);
+            return ResponseEntity.ok(restoredCategory);
+        } catch (ResponseStatusException ex) {
+            return ResponseEntity.status(ex.getStatusCode()).body(ex.getReason());
+        }
     }
 
     @PreAuthorize("hasRole('ADMIN')")

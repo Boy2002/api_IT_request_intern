@@ -1,6 +1,7 @@
 package com.rider.it_request_service.service;
 
 import com.rider.it_request_service.dto.*;
+import com.rider.it_request_service.entity.Category;
 import com.rider.it_request_service.entity.Request;
 import com.rider.it_request_service.entity.RequestStatusHistory;
 import com.rider.it_request_service.entity.User;
@@ -24,7 +25,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class RequestService {
@@ -99,14 +102,23 @@ public class RequestService {
     }
 
     public RequestDTO addRequest(CustomUserDetails user, RequestDTO requestDTO) {
-        // ตรวจสอบว่า Category และ User มีอยู่จริงหรือไม่
-        categoryRepository
-                .findById(requestDTO.getCategoryId())
-                .orElseThrow(
-                        () ->
-                                new GlobalExceptionHandler.ResourceNotFoundException(
-                                        "Category not found with ID: "
-                                                + requestDTO.getCategoryId()));
+
+        // ตรวจสอบว่า Category มีอยู่จริงหรือไม่ และไม่ได้ถูกลบ
+        Category category =
+                categoryRepository
+                        .findById(requestDTO.getCategoryId())
+                        .orElseThrow(
+                                () ->
+                                        new ResponseStatusException(
+                                                HttpStatus.NOT_FOUND,
+                                                "Category not found with ID: "
+                                                        + requestDTO.getCategoryId()));
+
+        if (category.isDeleted()) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "The selected category has been deleted and cannot be used.");
+        }
 
         userRepository
                 .findById(user.getUserId())
@@ -314,7 +326,7 @@ public class RequestService {
     //
     // }
 
-    public Page<RequestAdminBoardDTO> searchRequests(SearchRequestDTO searchDto) {
+    public CustomPageWithStatisticsDTO searchRequests(SearchRequestDTO searchDto) {
         // สร้าง CriteriaBuilder
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Request> query = cb.createQuery(Request.class);
@@ -427,8 +439,33 @@ public class RequestService {
                         .map(requestAdminBoardMapper::toDTO)
                         .collect(Collectors.toList());
 
-        // ส่งผลลัพธ์กลับในรูปแบบของ Page โดยใช้ totalCount
-        return new PageImpl<>(dtoList, PageRequest.of(page, size), totalCount);
+        long totalRequests = dtoList.size();
+
+        // ✅ คำนวณจำนวนคำร้องขอแต่ละสถานะโดยใช้ Stream API
+        long pendingCount =
+                dtoList.stream().filter(r -> "PENDING".equalsIgnoreCase(r.getStatus())).count();
+        long inProgressCount =
+                dtoList.stream().filter(r -> "IN_PROGRESS".equalsIgnoreCase(r.getStatus())).count();
+        long resolvedCount =
+                dtoList.stream().filter(r -> "RESOLVED".equalsIgnoreCase(r.getStatus())).count();
+        long rejectedCount =
+                dtoList.stream().filter(r -> "REJECTED".equalsIgnoreCase(r.getStatus())).count();
+
+        return CustomPageWithStatisticsDTO.builder()
+                .content(dtoList) // ✅ ใช้ List ตรงนี้
+                .totalElements(totalCount)
+                .totalPages((int) Math.ceil((double) totalCount / size))
+                .size(size)
+                .page(page)
+                .first(page == 0)
+                .last((page + 1) * size >= totalCount)
+                .numberOfElements(dtoList.size())
+                .empty(dtoList.isEmpty())
+                .pendingRequests(pendingCount)
+                .inProgressRequests(inProgressCount)
+                .resolvedRequests(resolvedCount)
+                .rejectedRequests(rejectedCount)
+                .build();
     }
 
     public Page<RequestAdminBoardDTO> getRequests(int page, int size) {
