@@ -32,7 +32,7 @@ public class RequestAdminBoardMapper {
         List<String> filePaths =
                 requestFile.stream().map(RequestFile::getFilePath).collect(Collectors.toList());
 
-        String files = filePaths.isEmpty() ? "notfound" : String.join(", ", filePaths);
+        String files = filePaths.isEmpty() ? null : String.join(", ", filePaths);
 
         return new RequestAdminBoardDTO(
                 request.getCreatedAt(), // วันที่ร้องขอ
@@ -57,7 +57,7 @@ public class RequestAdminBoardMapper {
                 requestFileRepository.findRequestFileByrequestId(request.getRequestId());
         List<String> fileNames =
                 requestFile.stream().map(RequestFile::getFileName).collect(Collectors.toList());
-        String files = fileNames.isEmpty() ? "notfound" : String.join(", ", fileNames);
+        String files = fileNames.isEmpty() ? null : String.join(", ", fileNames);
         List<RequestStatusHistory> historyList =
                 requestStatusHistoryRepository.findByrequestId(request.getRequestId());
         /*Optional<User> ChangedBy = userRepository.findById(history.getChangedBy());*/
@@ -105,7 +105,7 @@ public class RequestAdminBoardMapper {
         List<String> fileNames =
                 requestFile.stream().map(RequestFile::getFileName).collect(Collectors.toList());
 
-        String files = fileNames.isEmpty() ? "notfound" : String.join(", ", fileNames);
+        String files = fileNames.isEmpty() ? null : String.join(", ", fileNames);
 
         return new RequestAdminBoardDTO(
                 requestDTO.getCreatedAt(), // วันที่ร้องขอ

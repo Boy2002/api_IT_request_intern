@@ -382,7 +382,9 @@ public class RequestService {
         }
 
         // ใช้ นับtotalelement ตามคิวรี่่
-        String baseQuery = "SELECT COUNT(r) FROM Request r WHERE 1=1 ";
+        String baseQuery =
+                "SELECT r.status, COUNT(r) " +
+                        "FROM Request r WHERE 1=1 ";
 
         if (searchDto.requestId() != null) {
             baseQuery += " AND r.requestId = :requestId";
@@ -401,7 +403,10 @@ public class RequestService {
             baseQuery += " AND r.status = :status";
         }
 
-        TypedQuery<Long> countQuery = entityManager.createQuery(baseQuery, Long.class);
+// Group by status and count
+        baseQuery += " GROUP BY r.status";
+
+        TypedQuery<Object[]> countQuery = entityManager.createQuery(baseQuery, Object[].class);
 
         if (searchDto.requestId() != null) {
             countQuery.setParameter("requestId", searchDto.requestId());
@@ -419,13 +424,22 @@ public class RequestService {
             countQuery.setParameter("status", searchDto.status());
         }
 
-        long totalCount = countQuery.getSingleResult();
+        List<Object[]> statusCounts = countQuery.getResultList();
+        Map<String, Long> statusMap = new HashMap<>();
+        for (Object[] statusCount : statusCounts) {
+            statusMap.put(((Request.Status) statusCount[0]).name(), (Long) statusCount[1]);  // แก้ไขตรงนี้
+        }
 
-        // สิ้นสุด นับtotalelement ตามคิวรี่่
+// ตรวจสอบสถานะต่างๆ ว่ามีคำร้องใดบ้าง
+        long pendingCount = statusMap.getOrDefault("PENDING", 0L);
+        long inProgressCount = statusMap.getOrDefault("IN_PROGRESS", 0L);
+        long resolvedCount = statusMap.getOrDefault("RESOLVED", 0L);
+        long rejectedCount = statusMap.getOrDefault("REJECTED", 0L);
 
-        // ใช้ EntityManager ในการ Query
+// ใช้ EntityManager ในการ Query ข้อมูล Request ตามเงื่อนไขต่างๆ
         TypedQuery<Request> typedQuery = entityManager.createQuery(query);
-        // คำนวณ pagination
+
+// คำนวณ pagination
         int page = searchDto.page();
         int size = searchDto.size();
         typedQuery.setFirstResult(page * size);
@@ -433,26 +447,16 @@ public class RequestService {
 
         List<Request> resultList = typedQuery.getResultList();
 
-        // เปลี่ยนผลลัพธ์ที่ได้เป็น DTO
-        List<RequestAdminBoardDTO> dtoList =
-                resultList.stream()
-                        .map(requestAdminBoardMapper::toDTO)
-                        .collect(Collectors.toList());
+// เปลี่ยนผลลัพธ์ที่ได้เป็น DTO
+        List<RequestAdminBoardDTO> dtoList = resultList.stream()
+                .map(requestAdminBoardMapper::toDTO)
+                .collect(Collectors.toList());
 
-        long totalRequests = dtoList.size();
+        long totalCount = statusMap.values().stream().mapToLong(Long::longValue).sum();  // ใช้ผลลัพธ์จาก countQuery สำหรับการคำนวณ totalCount
 
-        // ✅ คำนวณจำนวนคำร้องขอแต่ละสถานะโดยใช้ Stream API
-        long pendingCount =
-                dtoList.stream().filter(r -> "PENDING".equalsIgnoreCase(r.getStatus())).count();
-        long inProgressCount =
-                dtoList.stream().filter(r -> "IN_PROGRESS".equalsIgnoreCase(r.getStatus())).count();
-        long resolvedCount =
-                dtoList.stream().filter(r -> "RESOLVED".equalsIgnoreCase(r.getStatus())).count();
-        long rejectedCount =
-                dtoList.stream().filter(r -> "REJECTED".equalsIgnoreCase(r.getStatus())).count();
-
+// สร้าง Custom DTO response
         return CustomPageWithStatisticsDTO.builder()
-                .content(dtoList) // ✅ ใช้ List ตรงนี้
+                .content(dtoList)
                 .totalElements(totalCount)
                 .totalPages((int) Math.ceil((double) totalCount / size))
                 .size(size)
@@ -466,7 +470,131 @@ public class RequestService {
                 .resolvedRequests(resolvedCount)
                 .rejectedRequests(rejectedCount)
                 .build();
+
     }
+
+//    public CustomPageWithStatisticsDTO searchRequests(SearchRequestDTO searchDto) {
+//        // สร้าง CriteriaBuilder
+//        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+//        CriteriaQuery<Request> query = cb.createQuery(Request.class);
+//        Root<Request> root = query.from(Request.class);
+//
+//        // สร้างเงื่อนไขแบบ Dynamic
+//        List<Predicate> predicates = new ArrayList<>();
+//
+//        if (searchDto.requestId() != null) {
+//            predicates.add(cb.equal(root.get("requestId"), searchDto.requestId()));
+//        }
+//
+//        if (searchDto.name() != null) {
+//            Subquery<Integer> subquery = query.subquery(Integer.class);
+//            Root<User> userRoot = subquery.from(User.class);
+//            subquery.select(userRoot.get("userId"));
+//            subquery.where(cb.like(cb.lower(userRoot.get("name")), "%" + searchDto.name().toLowerCase() + "%"));
+//            predicates.add(cb.in(root.get("user").get("userId")).value(subquery));
+//        }
+//
+//        if (searchDto.requestNumber() != null) {
+//            predicates.add(cb.like(root.get("requestNumber"), "%" + searchDto.requestNumber() + "%"));
+//        }
+//
+//        if (searchDto.categoryId() != null) {
+//            predicates.add(cb.equal(root.get("categoryId"), searchDto.categoryId()));
+//        }
+//
+//        if (searchDto.status() != null) {
+//            predicates.add(cb.equal(root.get("status"), Request.Status.valueOf(String.valueOf(searchDto.status()))));
+//        }
+//
+//        // รวมเงื่อนไขทั้งหมด
+//        query.where(predicates.toArray(new Predicate[0]));
+//
+//        // ตรวจสอบว่า sortBy parameter ที่ส่งมาถูกต้อง
+//        if (!List.of("createdAt", "updatedAt").contains(searchDto.sortBy())) {
+//            throw new IllegalArgumentException("Invalid sortBy parameter: " + searchDto.sortBy());
+//        }
+//
+//        // เพิ่มการ Sort
+//        if ("asc".equalsIgnoreCase(searchDto.sortDirection())) {
+//            query.orderBy(cb.asc(root.get(searchDto.sortBy())));
+//        } else {
+//            query.orderBy(cb.desc(root.get(searchDto.sortBy())));
+//        }
+//
+//        // ใช้ EntityManager ในการ Query
+//        TypedQuery<Request> typedQuery = entityManager.createQuery(query);
+//        int page = searchDto.page();
+//        int size = searchDto.size();
+//        typedQuery.setFirstResult(page * size);
+//        typedQuery.setMaxResults(size);
+//
+//        List<Request> resultList = typedQuery.getResultList();
+//
+//        // เปลี่ยนผลลัพธ์ที่ได้เป็น DTO
+//        List<RequestAdminBoardDTO> dtoList = resultList.stream()
+//                .map(requestAdminBoardMapper::toDTO)
+//                .collect(Collectors.toList());
+//
+//        // ✅ ใช้ Criteria API ในการนับสถานะ โดยใช้ Predicate เดียวกัน
+//        CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
+//        Root<Request> countRoot = countQuery.from(Request.class);
+//
+//        countQuery.select(cb.count(countRoot));
+//        countQuery.where(cb.and(predicates.toArray(new Predicate[0])));
+//        // ใช้เงื่อนไขเดียวกับการค้นหา
+//
+//        long totalCount = entityManager.createQuery(countQuery).getSingleResult();
+//
+//        // ✅ นับจำนวนคำร้องขอแต่ละสถานะโดยใช้ Query แบบ Dynamic
+//        long pendingCount = getStatusCount(Request.Status.PENDING, searchDto);
+//        long inProgressCount = getStatusCount(Request.Status.IN_PROGRESS, searchDto);
+//        long resolvedCount = getStatusCount(Request.Status.RESOLVED, searchDto);
+//        long rejectedCount = getStatusCount(Request.Status.REJECTED, searchDto);
+//
+//        return CustomPageWithStatisticsDTO.builder()
+//                .content(dtoList)
+//                .totalElements(totalCount)
+//                .totalPages((int) Math.ceil((double) totalCount / size))
+//                .size(size)
+//                .page(page)
+//                .first(page == 0)
+//                .last((page + 1) * size >= totalCount)
+//                .numberOfElements(dtoList.size())
+//                .empty(dtoList.isEmpty())
+//                .pendingRequests(pendingCount)
+//                .inProgressRequests(inProgressCount)
+//                .resolvedRequests(resolvedCount)
+//                .rejectedRequests(rejectedCount)
+//                .build();
+//    }
+//
+//    private long getStatusCount(Request.Status status, SearchRequestDTO searchDto) {
+//        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+//        CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
+//        Root<Request> root = countQuery.from(Request.class);
+//
+//        List<Predicate> predicates = new ArrayList<>();
+//
+//        if (searchDto.requestId() != null) {
+//            predicates.add(cb.equal(root.get("requestId"), searchDto.requestId()));
+//        }
+//
+//        if (searchDto.requestNumber() != null) {
+//            predicates.add(cb.like(root.get("requestNumber"), "%" + searchDto.requestNumber() + "%"));
+//        }
+//
+//        if (searchDto.categoryId() != null) {
+//            predicates.add(cb.equal(root.get("categoryId"), searchDto.categoryId()));
+//        }
+//
+//        predicates.add(cb.equal(root.get("status"), status)); // ใช้ status เฉพาะในฟังก์ชันนี้
+//
+//        countQuery.select(cb.count(root)).where(cb.and(predicates.toArray(new Predicate[0])));
+//
+//        return entityManager.createQuery(countQuery).getSingleResult();
+//    }
+
+
 
     public Page<RequestAdminBoardDTO> getRequests(int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
